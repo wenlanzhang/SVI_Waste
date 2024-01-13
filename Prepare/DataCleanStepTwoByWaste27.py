@@ -24,7 +24,8 @@ def label_png():
     count = 0
     ang_list = ["_0", "_90", "_180", "_270"]
     model = YOLO("E:\WorkSpace\SVI_Waste\waste27.pt")
-    for line in CSV_LIST:
+    tmp_list = CSV_LIST
+    for line in tmp_list:
         pre_name = line[2]
         if pre_name == "panoid":
             continue
@@ -55,7 +56,7 @@ def label_png():
     # 将二维数组写入CSV文件
     with open(csv_file_path, 'w', newline='', encoding='utf-8') as csvfile:
         csv_writer = csv.writer(csvfile)
-        csv_writer.writerows(CSV_LIST)
+        csv_writer.writerows(tmp_list)
 
 
 if __name__ == '__main__':
