@@ -4,8 +4,8 @@ import random
 if __name__ == '__main__':
     trainval_percent = 1.0
     train_percent = 0.9
-    xmlfilepath = "E:\WorkSpace\SVI_Waste\Data\\relabel\labels"
-    txtsavepath = "E:\WorkSpace\SVI_Waste\Data\\relabel\dataSet"
+    xmlfilepath = "E:\WorkSpace\SVI_Waste\Data\\135\labels"
+    txtsavepath = "E:\WorkSpace\SVI_Waste\Data\\135\dataSet"
     total_xml = os.listdir(xmlfilepath)
     if not os.path.exists(txtsavepath):
         os.makedirs(txtsavepath)
@@ -28,7 +28,7 @@ if __name__ == '__main__':
         #     lines = file.readlines()
         #     if len(lines) != 1:
         #         continue
-        name = "E:\WorkSpace\SVI_Waste\Data\\relabel\images\\"+total_xml[i][:-4] + '.jpg\n'
+        name = "E:\WorkSpace\SVI_Waste\Data\\135\images\\"+total_xml[i][:-4] + '.jpg\n'
         if i in trainval:
             file_trainval.write(name)
             if i in train:
