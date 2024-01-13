@@ -1,25 +1,10 @@
 import os
 import csv
 
-from detectron2.config import get_cfg
-from detectron2 import model_zoo
-from detectron2.data import detection_utils
-from Detectron2.predictor import VisualizationDemo
+from ultralytics import YOLO
 
 PNG_MAP = {}
 CSV_LIST = []
-
-def setup_cfg():
-    # load config from file and command-line arguments
-    cfg = get_cfg()
-    cfg.merge_from_file(model_zoo.get_config_file("COCO-PanopticSegmentation/panoptic_fpn_R_101_3x.yaml"))
-    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-PanopticSegmentation/panoptic_fpn_R_101_3x.yaml")
-    # Set score_threshold for builtin models
-    # cfg.MODEL.RETINANET.SCORE_THRESH_TEST = args.confidence_threshold
-    # cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.confidence_threshold
-    # cfg.MODEL.PANOPTIC_FPN.COMBINE.INSTANCES_CONFIDENCE_THRESH = args.confidence_threshold
-    # cfg.freeze()
-    return cfg
 
 def build_png_ind():
     folder_path = "E:\WorkSpace\SVI_Waste\source\Maoran"
@@ -37,9 +22,8 @@ def read_csv():
 
 def label_png():
     count = 0
-    cfg = setup_cfg()
-    demo = VisualizationDemo(cfg)
     ang_list = ["_0", "_90", "_180", "_270"]
+    model = YOLO("E:\WorkSpace\SVI_Waste\waste27.pt")
     for line in CSV_LIST:
         pre_name = line[2]
         if pre_name == "panoid":
@@ -51,17 +35,17 @@ def label_png():
                 if os.path.exists(path):
                     count = count + 1
                     print(count)
-                    img = detection_utils.read_image(path, format="BGR")
-                    predictions, _ = demo.run_on_image(img)
-                    res_list = predictions['panoptic_seg'][1]
+                    res_list = model(path,
+                                     imgsz=(400, 300), conf=0.6, device=0)
                     mark = False
                     for res in res_list:
-                        is_thing = res["isthing"]
-                        cate_id = res["category_id"]
-                        if is_thing == False and cate_id in (11, 47):
-                            line.append(res.get("area"))
-                            mark = True
-                            break
+                        p_list = res.boxes.cpu().conf.numpy()
+                        if p_list.size > 0:
+                            p = p_list[0]
+                            if p > 0:
+                                line.append(p)
+                                mark = True
+                                break
                     if not mark:
                         line.append(0)
             else:
