@@ -5,6 +5,7 @@ Pano image: 126,414
 total image: 505,656
 
 # /Data Explanation
+for output data folder:
 output: identified with dirt and gravel, 126,414  
 img_path: added path to the img (WL), 126,414  
 Data_long: separate dataset with direction, 505,656
