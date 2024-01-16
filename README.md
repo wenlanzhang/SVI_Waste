@@ -8,9 +8,8 @@ total image: 505,656
 output: identified with dirt and gravel, 126,414  
 img_path: added path to the img (WL), 126,414  
 Data_long: separate dataset with direction, 505,656
-Pre_screen_data: to be manuel check: 290,869
-Waste4Yolo: 135 file for training
-
-0113 progress:  4000
+Waste4Yolo: 135 file for training  
+  
+0113 progress:  4000  
 
 
