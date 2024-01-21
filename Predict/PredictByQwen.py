@@ -42,7 +42,8 @@ def label_png_four_ang():
                     res = predict_by_blm(path, "这张图片中是否含有垃圾堆?")
                     print(res)
                     mark = False
-                    if "是" in res or "yes" in res:
+                    if "没" not in res and "无" not in res:
+                        print(path)
                         line.append(1)
                         mark = True
                     if not mark:
