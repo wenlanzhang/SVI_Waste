@@ -1,3 +1,5 @@
+import random
+
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers.generation import GenerationConfig
 import torch
@@ -37,7 +39,7 @@ def label_png_four_ang():
                 if os.path.exists(path):
                     count = count + 1
                     print(count)
-                    res = predict_by_blm(path, "仅用是或否回答，这张图片中含有垃圾堆吗?")
+                    res = predict_by_blm(path, "这张图片中是否含有垃圾堆?")
                     print(res)
                     mark = False
                     if "是" in res or "yes" in res:
@@ -57,7 +59,7 @@ def label_png_four_ang():
         csv_writer.writerows(tmp_list)
 
 def predict_by_blm(path, ques):
-    torch.manual_seed(1234)
+    torch.manual_seed(random.randint(1, 100000))
 
     query = Tokenizer.from_list_format([
         {'image': path},
