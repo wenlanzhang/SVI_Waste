@@ -95,6 +95,9 @@ if __name__ == '__main__':
     # read_csv("E:\WorkSpace\SVI_Waste\source\All_Img.csv")
     # label_png(YOLO("E:\WorkSpace\SVI_Waste\Yolo8\Customised_Model\waste47.pt"))
 
-    build_png_ind("E:\WorkSpace\SVI_Waste\source\Maoran")
-    read_csv("E:\WorkSpace\SVI_Waste\source\Maoran\pano_nairobi.csv")
-    label_png_four_ang(YOLO("E:\WorkSpace\SVI_Waste\Yolo8\Customised_Model\waste47.pt"))
+    # build_png_ind("E:\WorkSpace\SVI_Waste\source\Maoran")
+    # read_csv("E:\WorkSpace\SVI_Waste\source\Maoran\pano_nairobi.csv")
+    # label_png_four_ang(YOLO("E:\WorkSpace\SVI_Waste\Yolo8\Customised_Model\waste47.pt"))
+    read_csv("E:\WorkSpace\SVI_Waste\output_20240119_gs.csv")
+    t = CSV_LIST
+    print(t)
