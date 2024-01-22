@@ -39,10 +39,10 @@ def label_png_four_ang():
                 if os.path.exists(path):
                     count = count + 1
                     print(count)
-                    res = predict_by_blm(path, "这张图片中是否含有垃圾堆?")
+                    res = predict_by_blm(path, "这张图片中有什么?")
                     print(res)
                     mark = False
-                    if "没" not in res and "无" not in res:
+                    if "垃圾" in res:
                         print(path)
                         line.append(1)
                         mark = True
