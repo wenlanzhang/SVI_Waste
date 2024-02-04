@@ -11,6 +11,10 @@ img_path: added path to the img (WL), 126,414
 Data_long: separate dataset with direction, 505,656
 Waste4Yolo: 135 file for training  
   
-0113 progress:  4000  
+0119 progress:  15000  
+
+
+Confusing factors: leaves, sparse grass / leaves,  informal markets, 
+wet and dry dirt, gravel, haystack etc.
 
 
