@@ -1,0 +1,13 @@
+1. module -f unload compilers mpi gcc-libs
+module load beta-modules
+module load gcc-libs/10.2.0
+module load python3/3.9-gnu-10.2.0
+module load cuda/11.3.1/gnu-10.2.0
+module load cudnn/8.2.1.32/cuda-11.3
+module load pytorch/1.11.0/gpu
+
+2. python -m venv myenv  # 创建虚拟环境
+source myenv/bin/activate  # 激活虚拟环境
+
+3. cd /home/ucfnwzh/workspace/Qwen-VL
+pip install -r requirements.txt

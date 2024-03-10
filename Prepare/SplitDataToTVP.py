@@ -4,8 +4,8 @@ import random
 if __name__ == '__main__':
     trainval_percent = 1.0
     train_percent = 0.9
-    xmlfilepath = "E:\WorkSpace\SVI_Waste\Data\Train\\0118_198\labels"
-    txtsavepath = "E:\WorkSpace\SVI_Waste\Data\Train\\0118_198\dataSet"
+    xmlfilepath = "/content/datasets/Train0211/images"  # Use image path here
+    txtsavepath = "/content/datasets/Train0211/dataSet"
     total_xml = os.listdir(xmlfilepath)
     if not os.path.exists(txtsavepath):
         os.makedirs(txtsavepath)
@@ -23,12 +23,8 @@ if __name__ == '__main__':
     file_val = open(txtsavepath + '/val.txt', 'w')
 
     for i in list_index:
-        # txt = "E:\WorkSpace\SVI_Waste\Data\Waste4Yolo\labels\\"+total_xml[i][:-4] + '.txt'
-        # with open(txt, 'r') as file:
-        #     lines = file.readlines()
-        #     if len(lines) != 1:
-        #         continue
-        name = "E:\WorkSpace\SVI_Waste\Data\Train\\0118_198\images\\"+total_xml[i][:-4] + '.jpg\n'
+        filename_parts = total_xml[i].split('.')
+        name = xmlfilepath + "/" + filename_parts[0] + '.' + filename_parts[1] + '\n'
         if i in trainval:
             file_trainval.write(name)
             if i in train:
