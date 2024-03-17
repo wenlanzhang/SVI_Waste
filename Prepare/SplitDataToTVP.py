@@ -4,8 +4,8 @@ import random
 if __name__ == '__main__':
     trainval_percent = 1.0
     train_percent = 0.9
-    xmlfilepath = "/content/datasets/Train0211/images"  # Use image path here
-    txtsavepath = "/content/datasets/Train0211/dataSet"
+    xmlfilepath = "/Users/wenlanzhang/Downloads/PhD_UCL/Data/GoogleStreetView/Train/Train0315/images"  # Use image path here
+    txtsavepath = "/Users/wenlanzhang/Downloads/PhD_UCL/Data/GoogleStreetView/Train/Train0315/dataSet"
     total_xml = os.listdir(xmlfilepath)
     if not os.path.exists(txtsavepath):
         os.makedirs(txtsavepath)
