@@ -172,3 +172,5 @@ Yolo8/Yolo_Model
 # macOS system files
 **/.DS_Store
 .DS_Store
+Data/Output/GSVI/0315/GSVI_yolo_0318.csv
+Yolo8/Customised_Model/waste_0315.pt
