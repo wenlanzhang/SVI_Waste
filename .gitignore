@@ -6,6 +6,15 @@ __pycache__/
 # C extensions
 *.so
 
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# macOS system files
+**/.DS_Store
+.DS_Store
+
 # Distribution / packaging
 .Python
 build/
