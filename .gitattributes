@@ -1,0 +1,2 @@
+Data/Output/GSVI/0315/GSVI_yolo_0318.csv filter=lfs diff=lfs merge=lfs -text
+Yolo8/Customised_Model/waste_0315.pt filter=lfs diff=lfs merge=lfs -text
