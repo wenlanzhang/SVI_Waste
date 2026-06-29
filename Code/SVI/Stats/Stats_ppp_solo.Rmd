@@ -1,0 +1,354 @@
+```{r}
+library(sf)
+library(spatstat.geom)   
+library(spatstat.explore)
+library(ggplot2)
+library(raster)
+library(viridis)
+library(units)
+library(readr)
+library(sf)
+library(ggplot2)
+
+```
+
+# Read
+## Nairobi boundary
+```{r}
+# Read shapefile
+boundary <- st_read("/Users/wenlanzhang/Downloads/PhD_UCL/Data/Shp/NariobiShp/Shp_from_Constituency/Nairobi_shp_C.shp")
+# plot(st_geometry(boundary), col = "lightgrey", main = "Boundary Only")
+
+ggplot(boundary) +
+  geom_sf(fill = "lightgrey", color = "black") +
+  theme_minimal() +
+  labs(title = "Boundary Only")
+```
+
+
+## SVI
+```{r}
+df <- read.csv("/Users/wenlanzhang/Downloads/PhD_UCL/Data/Waste/img/Correct_SVI.csv")
+df <- df[df$img_dir != "ZWL/" & df$img_dir != "Faith/", ]
+df <- df[!is.na(df$lon) & !is.na(df$lat) & 
+         df$lon != 0 & df$lat != 0, ]
+df <- df[!duplicated(df[, c("lon", "lat", "img_dir", "panoid")]), ]
+# names(df)
+df
+```
+
+
+
+```{r}
+# Reproject points to match the shapefile CRS
+points <- st_as_sf(df, coords = c("lon", "lat"), crs = 4326)  # WGS84
+points <- st_transform(points, st_crs(boundary))
+
+# points
+```
+
+
+
+```{r}
+points_within <- points[st_within(points, boundary, sparse = FALSE), ]
+
+ggplot() +
+  geom_sf(data = boundary, fill = "lightgrey") +
+  geom_sf(data = points_within, color = "red", size = 1) +
+  theme_minimal() +
+  labs(title = "Points on Boundary")
+
+```
+
+
+
+# PPP
+## Convert points  (sf) to a spatstat window & point pattern (ppp)
+```{r}
+# ensure metric CRS
+points_utm <- st_transform(points_within, 32737) 
+boundary_utm  <- st_transform(boundary, 32737)
+```
+
+
+
+```{r}
+# convert window
+w <- as.owin(boundary_utm)    # study window for spatstat
+
+# get coords for ppp
+coords <- st_coordinates(points_utm)
+pp <- ppp(x = coords[,1], y = coords[,2], window = w)
+```
+
+
+## Kernel Density Estimate (KDE) — intuitive hotspot map
+```{r}
+# choose bandwidth (sigma). Try cross-validation or rule-of-thumb; also test multiple values.
+sigma <- 100 # metres (try 25,50,100 etc)
+
+dens <- density(pp, sigma = sigma, edge = TRUE, at = "pixels", eps = c(50,50)) 
+# dens is a pixel image (im object)
+
+# convert to raster for ggplot
+r <- raster::raster(dens)
+# convert raster -> dataframe for ggplot
+kde_df <- as.data.frame(r, xy = TRUE)
+colnames(kde_df) <- c("x","y","intensity")
+
+ggplot() +
+  geom_raster(data = kde_df, aes(x=x, y=y, fill = intensity)) +
+  scale_fill_viridis_c() +
+  geom_sf(data = boundary_utm, fill = NA, color = "black") +
+  # geom_sf(data = points_within, color = "red", size = 0.5) +
+  coord_sf() +
+  labs(title = "KDE of waste detections (sigma = 50 m)")
+```
+
+
+## Nearest-Neighbour Index (NNI) — global clustering test (simple)
+
+Formula and approach:
+- Observed mean nearest-neighbour distance: d_obs = mean(nndist(pp))
+- Under CSR, expected mean = `1/(2*sqrt(lambda))` where lambda = n / area
+- NNI = d_obs / d_expected. NNI < 1 → clustering.
+
+Monte-Carlo p-value: simulate CSR (same n, inside same window) many times and compare.
+```{r}
+n <- pp$n
+area_m2 <- area.owin(w)        # area in sq. metres
+lambda <- n / area_m2
+
+d_obs <- mean(nndist(pp))
+
+d_expected <- 1 / (2 * sqrt(lambda))
+NNI <- d_obs / d_expected
+
+# Monte-Carlo: simulate CSR 999 times and compute mean nndist for each
+nsim <- 99
+sim_means <- numeric(nsim)
+set.seed(42)
+for(i in seq_len(nsim)){
+  simpp <- runifpoint(n, win = w)    # CSR with n events
+  sim_means[i] <- mean(nndist(simpp))
+}
+p_value <- (sum(sim_means <= d_obs) + 1) / (nsim + 1) # one-sided for clustering
+
+list(NNI = NNI, d_obs = d_obs, d_expected = d_expected, p_value = p_value)
+```
+
+## Ripley’s K-function (with CSR envelopes)
+```{r}
+# Ripley's K-function
+K <- Kest(pp, correction = "Ripley")
+plot(K, main = "Ripley's K-function")
+```
+
+
+```{r}
+# Monte Carlo envelope for K
+set.seed(42)
+K_env <- envelope(pp, Kest, 
+                  correction = "border",  # correction = "Ripley", 
+                  # nsim = 39,
+                  # global = FALSE, savefuns = FALSE,
+                  rmax = 5000,
+                  # nr = 600
+                  )
+
+# Plot
+plot(K_env, main = "Ripley's K with CSR Envelope")
+```
+
+
+## Besag’s L-function (variance-stabilized K)
+```{r}
+# Besag's L-function
+L <- Lest(pp, correction = "border")
+plot(L, main = "Besag's L-function")
+```
+
+
+```{r}
+# Monte Carlo envelope for L
+set.seed(42)
+
+L_env <- envelope(
+  pp, Lest, nsim = 99,
+  correction = "border"
+)
+plot(L_env, main = "Besag's L with CSR envelope")
+# note: L(d) - d interpretation: positive => clustering; negative => inhibition
+```
+
+## Pair Correlation Function (pcf)
+```{r}
+# pcf is noisier; consider smoothing parameters or averaging
+pcf_est <- pcf(pp, correction = "Ripley")
+plot(pcf_est, main = "Pair Correlation Function (pcf)") 
+
+```
+
+
+```{r}
+# Envelope for pcf (use fewer sims because it's expensive)
+pcf_env <- envelope(
+  pp, pcf, nsim = 39,
+  correction = "Ripley", global = FALSE, savefuns = FALSE,
+)
+plot(pcf_env, main = "pcf with CSR envelope")
+# pcf > 1 indicates clustering at that distance
+```
+
+## Inhomogeneous K (if intensity is not constant)
+
+```{r}
+# Rule-of-thumb or profile-likelihood bandwidth
+sigma1 <- bw.diggle(pp)   # fast
+sigma2 <- bw.ppl(pp)      # slower but more robust
+sigma1; sigma2
+```
+
+
+```{r}
+# estimate intensity with density
+lambdahat <- density(pp, sigma = 200, edge = TRUE)
+length(lambdahat)
+
+# class(lambdahat) 
+# [1] "im"
+```
+
+
+```{r}
+# Plot the estimated intensity map (lambdahat)
+plot(lambdahat, main = "Estimated Intensity Map (lambdahat)")
+# points(pp, pch = 16, cex = 0.5, col = "red")
+```
+
+
+```{r}
+# Kinhom (uses lambdahat at point locations)
+K_inhom <- Kinhom(pp, lambda = lambdahat, correction = "border")
+plot(K_inhom, main = "Inhomogeneous K")
+```
+这里没定义0假设
+
+
+
+```{r}
+## 1. Recalculate lambdahat 
+# lambdahat <- density(pp, sigma = sigma2, edge = TRUE) 
+
+## 2. Force all negative values to zero
+# Use the pmax function (parallel maximum) to take the max of each pixel value and zero.
+lambdahat_positive <- eval.im(pmax(0, lambdahat))
+
+plot(lambdahat_positive, main = "Estimated Intensity Map (lambdahat_positive)")
+
+```
+
+
+```{r}
+
+## 3. Re-run the Envelope Calculation with the corrected intensity
+Kinhom_env <- envelope(
+  pp, 
+  fun = Kinhom,
+  nsim = 39,
+  correction = "border", 
+  global = FALSE, 
+  savefuns = FALSE,
+  simulate = expression(
+    # Use the corrected, positive intensity map here:
+    rpoispp(lambda = lambdahat_positive) 
+  )
+)
+
+plot(Kinhom_env, main = "Inhomogeneous K Envelope (Fixed)")
+```
+通过 simulate = expression(...) 参数 明确定义了零假设模型。
+模型定义： rpoispp(lambda = lambdahat_positive) 定义了 非齐次泊松过程 (IPP)，强度规则由您的 $\hat{\lambda}$ (lambdahat_positive) 给出。结论： 这次检验的是 数据是否比根据 $\hat{\lambda}$ 规则随机放置的点更聚集。
+由于您的观测值在包络线内，因此答案是否定的。
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+# Example🧪: Inhomogeneous K-Function
+```{r}
+# Install and load the necessary library if you haven't already
+# install.packages("spatstat.geom")
+library(spatstat.geom)
+
+# Use the 'redwood' point pattern, which is known to be clustered
+pp <- redwood
+```
+
+## Estimate the Intensity ($\hat{\lambda}$)
+```{r}
+# Estimate the intensity (lambdahat) using kernel smoothing.
+# We'll choose a sigma value that is about 1/10th of the window size (80x80)
+# Adjusting this value can fix the "zero intensity" issue discussed earlier.
+bandwidth <- 8 
+lambdahat <- density(pp, sigma = bandwidth)
+
+# Plot the estimated intensity map (lambdahat)
+plot(lambdahat, main = "Estimated Intensity Map (lambdahat)")
+points(pp, pch = 16, cex = 0.5, col = "red")
+```
+## 3. Calculate the Inhomogeneous K-function
+```{r}
+# Calculate the Inhomogeneous K-function
+# 'correction = "border"' handles edge effects
+K_inhom <- Kinhom(pp, lambda = lambdahat, correction = "border")
+
+# Note: The warning 'fvlabels truncated...' might still appear here,
+# but it's safe to ignore or suppress (as shown in the first response).
+```
+
+
+## 4. Plot and Interpret the Result
+```{r}
+# Plot the result
+plot(K_inhom, 
+     main = "Inhomogeneous K-function for Redwood",
+     legend = TRUE)
+
+# The result for the redwood dataset should show clustering (the solid line 
+# should be above the dashed line for small 'r'), indicating that the points 
+# are clustered even after accounting for local density variation.
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+

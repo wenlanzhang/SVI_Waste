@@ -1,6 +1,0 @@
-train: E:\WorkSpace\SVI_Waste\Data\Train\0116_132\dataSet\train.txt
-val: E:\WorkSpace\SVI_Waste\Data\Train\0116_132\dataSet\val.txt
-
-names:
-  0 : Waste
-nc: 1

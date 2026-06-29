@@ -1,0 +1,29 @@
+# Core ML & data
+ultralytics>=8.0.0
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Geospatial
+geopandas>=0.14.0
+shapely>=2.0.0
+
+# Visualisation & stats
+matplotlib>=3.7.0
+seaborn>=0.13.0
+scikit-learn>=1.3.0
+scipy>=1.11.0
+hdbscan>=0.8.33
+
+# Notebooks
+jupyter>=1.0.0
+ipykernel>=6.0.0
+
+# Optional: Qwen-VL inference (Predict/PredictByQwen.py)
+# transformers>=4.36.0
+# torch>=2.0.0
+
+# Optional: Detectron2 pre-filtering (Prepare/DataCleanStepOne.py)
+# detectron2  — install from https://github.com/facebookresearch/detectron2
+
+# Optional: clear notebook outputs before commit
+# nbstripout>=0.6.0

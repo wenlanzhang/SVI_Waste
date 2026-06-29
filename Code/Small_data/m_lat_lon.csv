@@ -1,0 +1,120 @@
+sub_county,ward,lat,lon,_capture_the_location_precision,feature,garbage/garbage_type,garbage/other_garbage_type,garbage/garbage_ownership,garbage/other_garbage_ownership,comments,description
+Dagoretti South,Riruta,-1.2237206,36.8825131,4.049,garbage point,holding ground,,community,,No waste segregation at the point,
+Dagoretti South,Ng'ando,-1.2939686,36.7540506,4.662,garbage point,illegal dumping,,public land,,Dumping is usually rampant,
+Dagoretti South,Ng'ando,-1.2954408,36.7555779,4.83,garbage point,illegal dumping,,public land,,Rampant dumping along the road,
+Dagoretti South,Ng'ando,-1.2965409,36.7561616,4.621,garbage point,illegal dumping,,public land,,Dumping due to drainage clearing,
+Dagoretti South,Ng'ando,-1.2982297,36.7586461,4.004,garbage point,illegal dumping,,public land,,Rampant dumpings,
+Dagoretti South,Ng'ando,-1.2993294,36.7574613,4.655,garbage point,holding ground,,public land,,Huge waste loads with frequent dumpings,
+Dagoretti South,Ng'ando,-1.3001478,36.7576411,3.903,garbage point,illegal dumping,,public land,,Dumping on major roads is rampant,
+Embakasi East,Upper Savanna,-1.3031106,36.8881969,4.645,garbage point,illegal dumping,,other,outering road donholm near equity bank,,
+Embakasi West,Mowlem,-1.2671017,36.8970867,4.05,garbage point,holding ground,,other,roadside,,
+Embakasi West,Mowlem,-1.2658033,36.8959999,4.05,garbage point,holding ground,,other,roadside,,
+Embakasi West,Mowlem,-1.2653798,36.8960844,4.44,garbage point,holding ground,,other,road reserves,,
+Embakasi Central,Kayole North,-1.2708565,36.923983,4.9,garbage point,collection point,,public land,,The area is a good holding point for waste from across the subcounty,
+Starehe,Nairobi Central,-1.2841664,36.8203314,1.936,garbage point,collection point,,public land,,Not bad state though no proper arrangement of the skips,
+Starehe,Landimawe,-1.3121805,36.8571396,3.829,garbage point,illegal dumping,,public land,,This is an illegal dumping site along Migwani road.,
+Starehe,Landimawe,-1.3116044,36.8499555,4.659,garbage point,collection point,,public land,,This is a collection point at Kayaba stage along Enterprise road.,
+Starehe,Landimawe,-1.3132548,36.8498305,3.816,garbage point,illegal dumping,,public land,,Illegal dumping at Crescent Bridge and along Ngong' river Mukuru Kayaba informal settlement,
+Starehe,Landimawe,-1.3107197,36.8479623,4.604,garbage point,illegal dumping,,public land,,Illegal dumping near Timsales wall along Enterprise road,
+Starehe,Landimawe,-1.3107447,36.8456915,3.959,garbage point,holding ground,,public land,,An holding ground by Green Army for holding waste awaiting collection.,
+Starehe,Landimawe,-1.3099923,36.8444971,4.004,garbage point,holding ground,,public land,,An holding ground by Green Army for holding solid waste awaiting collection by trucks.,
+Starehe,Landimawe,-1.3092484,36.8445078,3.699,garbage point,illegal dumping,,public land,,Illegal dumping near office of the Chief Mukuru Kayaba Location off Enterprise road,
+Starehe,Landimawe,-1.304317,36.8392502,4.455,garbage point,illegal dumping,,public land,,Illegal dumping at Dakar road junction,
+Starehe,Landimawe,-1.304752,36.8302585,4.307,garbage point,holding ground,,public land,,An holding ground for Green Army at Dundori road,
+Starehe,Landimawe,-1.2931231,36.8362157,4.889,garbage point,holding ground,,private,,An holding ground for the Green army along Factory street,
+Starehe,Landimawe,-1.2924916,36.8380938,4.162,garbage point,illegal dumping,,public land,,Illegal dumping on public land owned by Kenya Railways Cooperation,
+Starehe,Landimawe,-1.2932766,36.8378549,4.732,garbage point,collection point,,public land,,Collection point for solid waste awaiting trucks collection and transportation to Dandora dumpsite,
+Roysambu,Roysambu,-1.2225691,36.8823639,4.9,garbage point,illegal dumping,,public land,,should be collected regularly to reduce heaping.,
+Roysambu,Roysambu,-1.2227325,36.8823106,4.672,garbage point,bin,,community,,"it is emptied on a weekly basis 
+",
+Roysambu,Githurai,-1.2036125,36.9106787,2.0,garbage point,holding ground,,public land,,used as a temporary holding point for cbos to allow sorting before the waste is collected and transported to the final destination,
+Ruaraka,Babadogo,-1.245047,36.8680817,4.363,garbage point,illegal dumping,,other,under a foot bridge,no,
+Ruaraka,Babadogo,-1.2457254,36.8681935,4.972,garbage point,illegal dumping,,other,road reserve,no,
+Ruaraka,Mathare North,-1.2565195,36.8653699,4.36,garbage point,illegal dumping,,other,riparian reserve,no,
+Lang'ata,Mugumo-ini,-1.3276393,36.7790747,4.795,garbage point,illegal dumping,,public land,,road reserve,
+Lang'ata,Mugumo-ini,-1.3286648,36.7795393,4.048,garbage point,illegal dumping,,public land,,road reserve,
+Lang'ata,Mugumo-ini,-1.3296155,36.7798372,4.18,garbage point,illegal dumping,,public land,,illegal dumping inside langata cemetery,
+Lang'ata,Mugumo-ini,-1.3225333,36.7774999,4.724,garbage point,illegal dumping,,public land,,road reserve,
+Lang'ata,Mugumo-ini,-1.3215462,36.7779034,4.322,garbage point,illegal dumping,,public land,,road reserve,
+Lang'ata,Mugumo-ini,-1.3188571,36.7769277,4.68,garbage point,illegal dumping,,community,,migingo estate,
+Lang'ata,Mugumo-ini,-1.3184772,36.7818414,4.805,garbage point,holding ground,,community,,raila village estate,
+Lang'ata,Mugumo-ini,-1.3181819,36.7835835,3.88,garbage point,illegal dumping,,public land,,road reserve,
+Lang'ata,Mugumo-ini,-1.3231246,36.7878761,4.426,garbage point,collection point,,community,,cbo holding point,
+Kasarani,Njiru,-1.221795,36.8820686,2.496,garbage point,illegal dumping,,other,roadside damping,Illegal,
+Dagoretti North,Kilimani,-1.2887447,36.8230603,76.927,garbage point,bin,,public land,,,
+Dagoretti North,Kilimani,-1.2887447,36.8230603,186.649,garbage point,bin,,public land,,,
+Embakasi South,Imara Daima,-1.324797,36.8855075,2.52,garbage point,collection point,,other,along the road,,
+Embakasi South,Imara Daima,-1.3255551,36.8876282,4.379,garbage point,collection point,,other,on the side of the road,,
+Embakasi South,Imara Daima,-1.3199344,36.883753,4.62,garbage point,illegal dumping,,other,along the river,,
+Embakasi North,Dandora Area III,-1.2467283,36.9051687,3.99,garbage point,illegal dumping,,other,along tom mboya primary school perimeter wall,Illegal dumping should be eliminated,
+Embakasi North,Dandora Area III,-1.2459867,36.9056418,4.976,garbage point,illegal dumping,,other,near dandora stadium entrance,Dumping should be cleared and monitoring/enforcement to be continued,
+Embakasi North,Dandora Area III,-1.2447516,36.9053769,2.566,garbage point,bin,,other,dandora stadium,,
+Embakasi North,Dandora Area III,-1.2451182,36.9052058,3.4,garbage point,bin,,other,dandora stadium,,
+Embakasi North,Dandora Area III,-1.2510138,36.9043427,4.7,garbage point,illegal dumping,,other,along cllr opudo road,Waste to be cleared and monitoring and enforcement to be continued,
+Embakasi North,Dandora Area III,-1.2459695,36.904452,4.965,garbage point,illegal dumping,,other,along john osogo road,Garbage to be cleared and monitoring and enforcement to be continued,
+Embakasi North,Dandora Area III,-1.2461571,36.9042166,3.2,garbage point,illegal dumping,,other,along john osogo road,Garbage to be cleared and monitoring and enforcement to continue,
+Embakasi North,Dandora Area III,-1.2462212,36.9040728,2.4,garbage point,other,Illegal dumping and burning of waste,other,along john osogo road,Garbage to be cleared and awareness creation and enforcement,
+Embakasi North,Kariobangi North,-1.2525338,36.8812655,3.878,garbage point,holding ground,,other,roadside,"Not a good site, unhealthy and would require prompt collection on a regular basis",
+Embakasi North,Kariobangi North,-1.2556586,36.8827745,4.805,garbage point,holding ground,,other,roadside,Requires prompt collection and getting an alternative holding/collection point,
+Embakasi North,Kariobangi North,-1.2621216,36.88243,4.637,garbage point,illegal dumping,,other,besides the river bank,"Illegal dumping is a menace, sensitization and creation of awareness to be intensified to curb illegal dumping esp on our water catchment areas",
+Westlands,Parklands/Highridge,-1.2648432,36.8051832,4.774,garbage point,collection point,,private,,Owned by Gentleman's Club,
+Dagoretti North,Gatina,-1.2798925,36.7515692,4.84,garbage point,collection point,,public land,,Dada Mary collection point,
+Dagoretti South,Riruta,-1.2237206,36.8825131,4.049,garbage point,holding ground,,community,,No waste segregation at the point,No waste segregation at the point
+Dagoretti South,Ng'ando,-1.2939686,36.7540506,4.662,garbage point,illegal dumping,,public land,,Dumping is usually rampant,Dumping is usually rampant
+Dagoretti South,Ng'ando,-1.2954408,36.7555779,4.83,garbage point,illegal dumping,,public land,,Rampant dumping along the road,Rampant dumping along the road
+Dagoretti South,Ng'ando,-1.2965409,36.7561616,4.621,garbage point,illegal dumping,,public land,,Dumping due to drainage clearing,Dumping due to drainage clearing
+Dagoretti South,Ng'ando,-1.2982297,36.7586461,4.004,garbage point,illegal dumping,,public land,,Rampant dumpings,Rampant dumpings
+Dagoretti South,Ng'ando,-1.2993294,36.7574613,4.655,garbage point,holding ground,,public land,,Huge waste loads with frequent dumpings,Huge waste loads with frequent dumpings
+Dagoretti South,Ng'ando,-1.3001478,36.7576411,3.903,garbage point,illegal dumping,,public land,,Dumping on major roads is rampant,Dumping on major roads is rampant
+Embakasi East,Upper Savanna,-1.3031106,36.8881969,4.645,garbage point,illegal dumping,,other,,,outering road donholm near equity bank	
+Embakasi West,Mowlem,-1.2671017,36.8970867,4.05,garbage point,holding ground,,other,,,roadside
+Embakasi West,Mowlem,-1.2658033,36.8959999,4.05,garbage point,holding ground,,other,,,roadside
+Embakasi West,Mowlem,-1.2653798,36.8960844,4.44,garbage point,holding ground,,other,,,road reserves
+Embakasi Central,Kayole North,-1.2708565,36.923983,4.9,garbage point,collection point,,public land,,The area is a good holding point for waste from across the subcounty,The area is a good holding point for waste from across the subcounty
+Starehe,Nairobi Central,-1.2841664,36.8203314,1.936,garbage point,collection point,,public land,,Not bad state though no proper arrangement of the skips,No proper arrangement of the skips
+Starehe,Landimawe,-1.3121805,36.8571396,3.829,garbage point,illegal dumping,,public land,,This is an illegal dumping site along Migwani road.,This is an illegal dumping site along Migwani road.
+Starehe,Landimawe,-1.3116044,36.8499555,4.659,garbage point,collection point,,public land,,This is a collection point at Kayaba stage along Enterprise road.,This is a collection point at Kayaba stage along Enterprise road.
+Starehe,Landimawe,-1.3132548,36.8498305,3.816,garbage point,illegal dumping,,public land,,Illegal dumping at Crescent Bridge and along Ngong' river Mukuru Kayaba informal settlement,Illegal dumping at Crescent Bridge and along Ngong' river Mukuru Kayaba informal settlement
+Starehe,Landimawe,-1.3107197,36.8479623,4.604,garbage point,illegal dumping,,public land,,Illegal dumping near Timsales wall along Enterprise road,Illegal dumping near Timsales wall along Enterprise road
+Starehe,Landimawe,-1.3107447,36.8456915,3.959,garbage point,holding ground,,public land,,An holding ground by Green Army for holding waste awaiting collection.,An holding ground by Green Army for holding waste awaiting collection.
+Starehe,Landimawe,-1.3099923,36.8444971,4.004,garbage point,holding ground,,public land,,An holding ground by Green Army for holding solid waste awaiting collection by trucks.,An holding ground by Green Army for holding solid waste awaiting collection by trucks.
+Starehe,Landimawe,-1.3092484,36.8445078,3.699,garbage point,illegal dumping,,public land,,Illegal dumping near office of the Chief Mukuru Kayaba Location off Enterprise road,Illegal dumping near office of the Chief Mukuru Kayaba Location off Enterprise road
+Starehe,Landimawe,-1.304317,36.8392502,4.455,garbage point,illegal dumping,,public land,,Illegal dumping at Dakar road junction,Illegal dumping at Dakar road junction
+Starehe,Landimawe,-1.304752,36.8302585,4.307,garbage point,holding ground,,public land,,An holding ground for Green Army at Dundori road,An holding ground for Green Army at Dundori road
+Starehe,Landimawe,-1.2931231,36.8362157,4.889,garbage point,holding ground,,private,,An holding ground for the Green army along Factory street,An holding ground for the Green army along Factory street
+Starehe,Landimawe,-1.2924916,36.8380938,4.162,garbage point,illegal dumping,,public land,,Illegal dumping on public land owned by Kenya Railways Cooperation,Illegal dumping on public land owned by Kenya Railways Cooperation
+Starehe,Landimawe,-1.2932766,36.8378549,4.732,garbage point,collection point,,public land,,Collection point for solid waste awaiting trucks collection and transportation to Dandora dumpsite,Collection point for solid waste awaiting trucks collection and transportation to Dandora dumpsite
+Roysambu,Roysambu,-1.2225691,36.8823639,4.9,garbage point,illegal dumping,,public land,,should be collected regularly to reduce heaping.,should be collected regularly to reduce heaping.
+Roysambu,Roysambu,-1.2227325,36.8823106,4.672,garbage point,bin,,community,,"it is emptied on a weekly basis 
+","Emptied on a weekly basis 
+"
+Roysambu,Githurai,-1.2036125,36.9106787,2.0,garbage point,holding ground,,public land,,used as a temporary holding point for cbos to allow sorting before the waste is collected and transported to the final destination,used as a temporary holding point for cbos to allow sorting before the waste is collected and transported to the final destination
+Ruaraka,Babadogo,-1.245047,36.8680817,4.363,garbage point,illegal dumping,,other,,no,
+Ruaraka,Babadogo,-1.2457254,36.8681935,4.972,garbage point,illegal dumping,,other,,no,
+Ruaraka,Mathare North,-1.2565195,36.8653699,4.36,garbage point,illegal dumping,,other,,no,
+Lang'ata,Mugumo-ini,-1.3276393,36.7790747,4.795,garbage point,illegal dumping,,public land,,road reserve,road reserve
+Lang'ata,Mugumo-ini,-1.3286648,36.7795393,4.048,garbage point,illegal dumping,,public land,,road reserve,road reserve
+Lang'ata,Mugumo-ini,-1.3296155,36.7798372,4.18,garbage point,illegal dumping,,public land,,illegal dumping inside langata cemetery,illegal dumping inside langata cemetery
+Lang'ata,Mugumo-ini,-1.3225333,36.7774999,4.724,garbage point,illegal dumping,,public land,,road reserve,road reserve
+Lang'ata,Mugumo-ini,-1.3215462,36.7779034,4.322,garbage point,illegal dumping,,public land,,road reserve,road reserve
+Lang'ata,Mugumo-ini,-1.3188571,36.7769277,4.68,garbage point,illegal dumping,,community,,migingo estate,migingo estate
+Lang'ata,Mugumo-ini,-1.3184772,36.7818414,4.805,garbage point,holding ground,,community,,raila village estate,raila village estate
+Lang'ata,Mugumo-ini,-1.3181819,36.7835835,3.88,garbage point,illegal dumping,,public land,,road reserve,road reserve
+Lang'ata,Mugumo-ini,-1.3231246,36.7878761,4.426,garbage point,collection point,,community,,cbo holding point,cbo holding point
+Kasarani,Njiru,-1.221795,36.8820686,2.496,garbage point,illegal dumping,,other,,Illegal,
+Embakasi South,Imara Daima,-1.324797,36.8855075,2.52,garbage point,collection point,,other,,,
+Embakasi South,Imara Daima,-1.3255551,36.8876282,4.379,garbage point,collection point,,other,,,
+Embakasi South,Imara Daima,-1.3199344,36.883753,4.62,garbage point,illegal dumping,,other,,,
+Embakasi North,Dandora Area III,-1.2467283,36.9051687,3.99,garbage point,illegal dumping,,other,,Illegal dumping should be eliminated,along tom mboya primary school perimeter wall
+Embakasi North,Dandora Area III,-1.2459867,36.9056418,4.976,garbage point,illegal dumping,,other,,Dumping should be cleared and monitoring/enforcement to be continued,near dandora stadium entrance
+Embakasi North,Dandora Area III,-1.2447516,36.9053769,2.566,garbage point,bin,,other,,,
+Embakasi North,Dandora Area III,-1.2451182,36.9052058,3.4,garbage point,bin,,other,,,
+Embakasi North,Dandora Area III,-1.2510138,36.9043427,4.7,garbage point,illegal dumping,,other,,Waste to be cleared and monitoring and enforcement to be continued,along cllr opudo road
+Embakasi North,Dandora Area III,-1.2459695,36.904452,4.965,garbage point,illegal dumping,,other,,Garbage to be cleared and monitoring and enforcement to be continued,along john osogo road
+Embakasi North,Dandora Area III,-1.2461571,36.9042166,3.2,garbage point,illegal dumping,,other,,Garbage to be cleared and monitoring and enforcement to continue,along john osogo road
+Embakasi North,Dandora Area III,-1.2462212,36.9040728,2.4,garbage point,other,Illegal dumping and burning of waste,other,,Garbage to be cleared and awareness creation and enforcement,along john osogo road
+Embakasi North,Kariobangi North,-1.2525338,36.8812655,3.878,garbage point,holding ground,,other,,"Not a good site, unhealthy and would require prompt collection on a regular basis",
+Embakasi North,Kariobangi North,-1.2556586,36.8827745,4.805,garbage point,holding ground,,other,,Requires prompt collection and getting an alternative holding/collection point,
+Embakasi North,Kariobangi North,-1.2621216,36.88243,4.637,garbage point,illegal dumping,,other,,"Illegal dumping is a menace, sensitization and creation of awareness to be intensified to curb illegal dumping esp on our water catchment areas",
+Westlands,Parklands/Highridge,-1.2648432,36.8051832,4.774,garbage point,collection point,,private,,Owned by Gentleman's Club,Owned by Gentleman's Club
+Dagoretti North,Gatina,-1.2798925,36.7515692,4.84,garbage point,collection point,,public land,,Dada Mary collection point,Dada Mary collection point

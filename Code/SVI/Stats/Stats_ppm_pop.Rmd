@@ -1,0 +1,776 @@
+---
+title: "Is clustering fully explained by population?"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+| **Method**                                                      | **Population considered?** | **How population enters the model**                                                                         | **Null hypothesis / Expected result if population explains pattern**                      | **Interpretation if observed > expected (above envelope)**                                                  |
+| --------------------------------------------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **1. K<sub>inhom</sub> (simple Poisson, no covariate)**         | ❌ No                       | None – assumes uniform intensity across space                                                               | Waste points follow a homogeneous Poisson process (completely random)                     | Clustering exists overall (hotspots) — pattern not random                                                   |
+| **2. K<sub>inhom</sub> (using scaled WorldPop λ)**              | ✅ Yes                      | WorldPop raster is scaled so that expected total points = observed total                                    | Waste points follow an inhomogeneous Poisson process where intensity ∝ population density | Clustering beyond population — other spatial drivers (e.g. infrastructure, socio-environmental factors)     |
+| **3. K<sub>inhom</sub> (using fitted PPM intensity)**           | ✅ Yes                      | λ(x, y) estimated by a fitted **ppm** model: `ppm(pp ~ pop)` (log-linear dependence on population)          | Waste distribution matches a population-dependent intensity surface                       | Significant clustering beyond the fitted intensity indicates residual aggregation unexplained by population |
+| **4. K<sub>inhom</sub> (using PPM with offset log(pop))**       | ✅ Yes (fixed baseline)     | Population used as an *offset*: `ppm(pp ~ offset(log(pop)))` → assumes strict proportionality to population | Waste expected exactly proportional to population                                         | Clustering above envelope means waste is *more* spatially concentrated than population alone predicts       |
+| **5. L<sub>inhom</sub> / Pair correlation (g<sub>inhom</sub>)** | ✅ (if λ supplied)          | Uses same λ image as K<sub>inhom</sub>                                                                      | Same as above — randomness conditional on λ                                               | Values > 1 ( or L(r) > r ) → clustering; < 1 → regularity                                                   |
+
+
+
+```{r}
+library(sf)
+library(terra)  
+library(spatstat.geom)
+library(spatstat.explore)
+library(spatstat.model)   
+library(spatstat.random)  # rpoispp, rthin
+library(ggplot2)
+library(viridis)
+library(units)
+library(readr)
+library(spatstat.geom)
+library(ggplot2)
+library(viridis)
+library(sf)
+base_dir <- "/Users/wenlanzhang/PycharmProjects/SVI_Waste/Code/SVI/Stats/Pop"
+
+```
+
+# Read
+## Nairobi boundary
+```{r}
+# Read shapefile
+boundary <- st_read("/Users/wenlanzhang/Downloads/PhD_UCL/Data/Shp/NariobiShp/Shp_from_Constituency/Nairobi_shp_C.shp")
+# plot(st_geometry(boundary), col = "lightgrey", main = "Boundary Only")
+
+ggplot(boundary) +
+  geom_sf(fill = "lightgrey", color = "black") +
+  theme_minimal() +
+  labs(title = "Boundary Only")
+```
+
+
+## SVI
+```{r}
+df <- read.csv("/Users/wenlanzhang/Downloads/PhD_UCL/Data/Waste/img/Correct_SVI.csv")
+df <- df[df$img_dir != "ZWL/" & df$img_dir != "Faith/", ]
+df <- df[!is.na(df$lon) & !is.na(df$lat) & 
+         df$lon != 0 & df$lat != 0, ]
+df <- df[!duplicated(df[, c("lon", "lat", "img_dir", "panoid")]), ]
+# names(df)
+# df
+head(df, 5)
+
+```
+
+
+```{r}
+# Reproject points to match the shapefile CRS
+points <- st_as_sf(df, coords = c("lon", "lat"), crs = 4326)  # WGS84
+points <- st_transform(points, st_crs(boundary))
+
+# points
+```
+
+
+### Clip to Nairobi
+```{r}
+points_within <- points[st_within(points, boundary, sparse = FALSE), ]
+
+ggplot() +
+  geom_sf(data = boundary, fill = "lightgrey") +
+  geom_sf(data = points_within, color = "red", size = 1) +
+  theme_minimal() +
+  labs(title = "Points on Boundary")
+
+```
+
+## Metric CRS
+```{r}
+points_utm <- st_transform(points_within, 32737) 
+boundary_utm  <- st_transform(boundary, 32737)
+boundary_utm_v <- vect(boundary_utm)
+```
+
+
+## WorldPop
+```{r}
+# Read a .tif raster
+# r <- rast("/Users/wenlanzhang/Downloads/PhD_UCL/Data/RS/Pop_density/ConstraintIndividualCountries/ken_ppp_2020_constrained.tif")
+r <- rast("//Users/wenlanzhang/Downloads/PhD_UCL/Data/RS/Pop_density/UnconstraintIndividualCountries/ken_ppp_2020.tif")
+# r <- rast("/Users/wenlanzhang/Downloads/PhD_UCL/Data/RS/Pop_density/PopDensity/ken_pd_2020_1km.tif")
+# r <- rast("/Users/wenlanzhang/Downloads/PhD_UCL/Data/RS/Pop_density/ken_pop_2024_CN_100m_R2025A_v1.tif")
+
+# View basic info
+r
+plot(r)
+```
+
+### Clip to Nairobi
+```{r}
+# Convert sf → SpatVector
+boundary_v <- vect(boundary)
+
+# 1. Crop raster to bounding box
+r_crop <- crop(r, boundary_v)
+
+# 2. Mask raster to exact polygon shape
+r_mask <- mask(r_crop, boundary_v)
+
+# Plot
+plot(r_mask)
+lines(boundary_v, col = "red")
+```
+
+### Reproject
+```{r}
+boundary_utm_v <- vect(boundary_utm)
+
+# Reproject raster
+r_mask_utm <- project(r_mask, boundary_utm_v)
+
+# Mask again (optional)
+r_mask_utm <- mask(r_mask_utm, boundary_utm_v)
+
+r_mask_utm
+plot(r_mask_utm)
+lines(boundary_utm_v, col = "red")
+```
+
+# PPM
+
+## Convert points (sf) to a spatstat window & point pattern (ppp)
+```{r}
+# convert window
+w <- as.owin(boundary_utm)    # study window for spatstat
+
+# get coords for ppp
+coords <- st_coordinates(points_utm)
+pp <- ppp(x = coords[,1], y = coords[,2], window = w)
+```
+
+```{r}
+rmax  <- 0.30 * diameter.owin(w)          # safer ceiling for K/L/g
+rvals <- seq(0, rmax, length.out = 200)
+
+# rvals <- seq(0, 3000, length.out = 200)   # adjust max distance to suit your study extent
+
+```
+
+
+# 1) Method A — Scale the WorldPop raster to be an intensity and test with Kinhom
+--- Method A: scale WorldPop -> lambda image, then Kinhom + envelopes ---
+
+This treats WorldPop as a spatial weight for expected intensity and rescales it so the expected total number of points equals the observed number.
+
+Notes on Method A: 
+- This method assumes proportionality: expected waste point intensity ∝ population density. That may or may not be substantively correct (waste generation could be non-linear with pop).
+- Make sure pop_im has no spurious NAs inside your window; mask or set NA→0 if needed (but consider meaningfully).
+
+
+```{r}
+# --- raster (raster::RasterLayer) -> im ---
+raster_to_im_fixed <- function(r){
+  if(inherits(r, "SpatRaster")) r <- raster::raster(r)
+  if(!inherits(r, "RasterLayer")) stop("Input must be RasterLayer or SpatRaster")
+  pts <- raster::rasterToPoints(r)   # x, y, val
+  xs <- sort(unique(pts[,1]))
+  ys <- sort(unique(pts[,2]))
+  # IMPORTANT: rows = length(ys), cols = length(xs)
+  zmat <- matrix(NA, nrow = length(ys), ncol = length(xs))
+  for(k in seq_len(nrow(pts))){
+    col_i <- match(pts[k,1], xs)   # x -> column index
+    row_j <- match(pts[k,2], ys)   # y -> row index
+    zmat[row_j, col_i] <- pts[k,3] # row (y), col (x)
+  }
+  # build im: xcol = xs (length ncol), yrow = ys (length nrow)
+  spatstat.geom::im(zmat, xcol = xs, yrow = ys)
+}
+
+# --- terra (SpatRaster) -> im (no raster package conversion) ---
+terra_to_im_fixed <- function(tr){
+  if(!inherits(tr, "SpatRaster")) stop("Input must be a terra SpatRaster")
+  ncell <- terra::ncell(tr)
+  coords <- terra::xyFromCell(tr, seq_len(ncell))
+  vals <- terra::values(tr)
+  pts <- cbind(coords, vals)
+  colnames(pts) <- c("x","y","v")
+  pts <- pts[!is.na(pts[,"v"]), , drop = FALSE]
+  xs <- sort(unique(pts[,"x"]))
+  ys <- sort(unique(pts[,"y"]))
+  zmat <- matrix(NA, nrow = length(ys), ncol = length(xs))
+  for(k in seq_len(nrow(pts))){
+    col_i <- match(pts[k,"x"], xs)
+    row_j <- match(pts[k,"y"], ys)
+    zmat[row_j, col_i] <- pts[k,"v"]
+  }
+  spatstat.geom::im(zmat, xcol = xs, yrow = ys)
+}
+```
+
+### Example
+```{r}
+# # --- Minimal test with a small raster ---
+# r_test <- raster(xmn=0, xmx=4, ymn=0, ymx=3, res=1)  # 4 x 3 grid
+# values(r_test) <- 1:ncell(r_test)
+# plot(r_test, main="raster test")
+# im_test <- raster_to_im_fixed(r_test)
+# plot(im_test, main="im (constructed)")
+```
+
+
+```{r}
+pop_im <- terra_to_im_fixed(r_mask_utm)
+
+pop_im <- eval.im(ifelse(is.na(pop_im), NA, pop_im))  # keep NA outside
+# optional: crop to the rectangle of w to avoid stray margins
+pop_im <- pop_im[as.rectangle(w), drop = TRUE]
+
+# 1. Visual check
+plot(pop_im, main = "Population image (pop_im, raw)")
+
+# 2. Summary / dimensions
+dim(pop_im$v)        # matrix dims: rows = length(y), cols = length(x)
+length(pop_im$xcol)  # x coordinates (should equal ncol(pop_im$v))
+length(pop_im$yrow)  # y coordinates (should equal nrow(pop_im$v))
+
+# 3. Range
+range(pop_im$v, na.rm = TRUE)
+
+# 4. Integral (total population mass over image)
+total_pop <- integral(pop_im)
+total_pop
+pop_im
+```
+
+```{r}
+# Compute integral (sum over area) of pop_im
+pop_total <- integral(pop_im)   # integral over spatial domain (units: population * area unit)
+
+# Create a lambda image scaled so that expected number of points equals observed npoints(pp)
+lambda_im <- pop_im * (npoints(pp) / pop_total)
+lambda_im  <- eval.im(pmax(lambda_im,  1e-12)) # ？
+
+# Visual check
+plot(lambda_im, main = "Scaled lambda image (expected points per unit area)")
+
+```
+
+
+```{r}
+#-----------------------------
+# USER OPTIONS: colours & file
+#-----------------------------
+lambda_palette_low  <- "#f9f6f0"    
+lambda_palette_high <- "#7F5539"      
+# dark blue: "#08306b"  light blue: "#f7fbff" 
+boundary_col        <- "black"
+points_col          <- "white"        # if you later add waste points
+output_file         <- "/Users/wenlanzhang/PycharmProjects/SVI_Waste/Code/SVI/Stats/Pop/fig_lambda_im.png"  #
+output_width_in     <- 6   # inches
+output_height_in    <- 5
+output_dpi          <- 300
+
+#-----------------------------
+# Prepare data for ggplot
+#-----------------------------
+# Convert lambda_im (im) to data frame
+lambda_df <- as.data.frame(lambda_im)
+colnames(lambda_df) <- c("x", "y", "lambda")
+
+boundary_utm_sf <- boundary_utm  # just to be explicit
+
+#-----------------------------
+# Make the plot
+#-----------------------------
+p_lambda <- ggplot() +
+  geom_raster(data = lambda_df,
+              aes(x = x, y = y, fill = lambda)) +
+  geom_sf(data = boundary_utm_sf,
+          fill = NA,
+          colour = boundary_col,
+          linewidth = 0.4) +
+  # IMPORTANT: use coord_sf(), not coord_equal()
+  coord_sf(expand = FALSE, crs = st_crs(boundary_utm_sf)) +
+  scale_fill_gradient(
+    name = "λ (expected\npoints / m²)",
+    low  = lambda_palette_low,
+    high = lambda_palette_high,
+    na.value = "transparent"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    panel.grid = element_blank(),
+    legend.position = "right",
+    axis.title = element_blank()
+  ) +
+  labs(title = "Scaled intensity λ based on population")
+
+# Show in RStudio / knitted PDF/HTML
+print(p_lambda)
+
+#-----------------------------
+# Save to file
+#-----------------------------
+ggsave(
+  filename = output_file,
+  plot     = p_lambda,
+  width    = output_width_in,
+  height   = output_height_in,
+  dpi      = output_dpi
+)
+```
+
+
+
+
+
+```{r}
+# Compute inhomogeneous K function using the population-derived lambda
+
+K_inhom_pop <- Kinhom(pp, lambda = lambda_im, r = rvals, correction = "translate")
+plot(K_inhom_pop, main = "Kinhom (using population-derived lambda)")
+```
+
+```{r}
+#------------------------------------
+# USER OPTIONS (edit these)
+#------------------------------------
+# col_obs   <- 
+# col_theo  <- 
+# linetype_theo <- "dashed"
+# output_file_Kinhom <- "/Users/wenlanzhang/PycharmProjects/SVI_Waste/Code/SVI/Stats/Pop/fig_Kinhom_pop.png" 
+output_file_Kinhom <- file.path(base_dir, "fig_Kinhom_pop.png")
+# output_width_in  <- 6
+# output_height_in <- 4.5
+# output_dpi       <- 300
+
+#------------------------------------
+# Convert spatstat 'fv' object to data frame
+#------------------------------------
+Kdf <- as.data.frame(K_inhom_pop)
+# Check column names if you like:
+names(Kdf)
+# For Kinhom with correction = "translate", you should have:
+# "r", "trans", "theo"
+
+#------------------------------------
+# Build the ggplot
+#------------------------------------
+
+p_Kinhom_pop <- ggplot(Kdf, aes(x = r)) +
+  geom_line(aes(y = trans, colour = "Observed K"), linewidth = 1) +
+  geom_line(aes(y = theo,  colour = "Poisson K"),
+            linewidth = 1, linetype =  "dashed") +
+  
+  scale_colour_manual(
+    name   = "",
+    values = c(
+      "Observed K" = "#92603d", # colour for observed K (translated)
+      "Poisson K"  = "#9b9c78"  # colour for Poisson/theoretical K
+    )
+  ) +
+  
+  labs(
+    x = "r (m)",
+    y = expression(K[in_hom](r)),
+    title = "Inhomogeneous K-function Population-derived intensity"
+  ) +
+  
+  theme_minimal(base_size = 12) +
+  theme(
+    # Add a neat frame around the plot
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 0.6),
+    panel.grid.major = element_line(color = "grey85", linewidth = 0.4),
+    panel.grid.minor = element_blank(),
+
+    plot.title = element_text(face = "bold", size = 14, hjust = 0.5),
+    axis.title = element_text(size = 12),
+    axis.text  = element_text(size = 11),
+
+    legend.position = "top",
+    legend.justification = "center",
+    legend.text = element_text(size = 11),
+    legend.margin = margin(t = -5, b = 0, l = 0, r = 0),
+
+    plot.margin = margin(10, 10, 10, 10)
+  )
+
+# Show it
+print(p_Kinhom_pop)
+
+#------------------------------------
+# Save to file
+#------------------------------------
+ggsave(
+  filename = output_file_Kinhom,
+  plot     = p_Kinhom_pop,
+  width    = output_width_in,
+  height   = output_height_in,
+  dpi      = output_dpi
+)
+
+```
+
+
+```{r}
+# Envelope test: simulate inhomogeneous Poisson with the same lambda image
+set.seed(42)
+env_pop <- envelope(pp,
+                    fun = Kinhom,
+                    simulate = expression(rpoispp(lambda_im)),
+                    nsim = 39,
+                    lambda = lambda_im,
+                    r = rvals,
+                    correction = "translate",
+                    verbose = FALSE)
+plot(env_pop, main = "Kinhom with population-based Poisson envelopes")
+```
+
+```{r}
+# Convert fv object to data.frame
+env_df <- as.data.frame(env_pop)
+
+shade_col   <- "#d2af8d"  # <-- choose your color
+shade_alpha <- 0.35       # <-- choose transparency
+
+p_envelope <- ggplot(env_df, aes(x = r)) +
+  
+  # Shaded envelope (lo-hi band)
+  geom_ribbon(aes(ymin = lo, ymax = hi),
+              fill = shade_col,
+              alpha = shade_alpha) +
+  
+  # Observed curve
+  geom_line(aes(y = obs, colour = "Observed K"),
+            linewidth = 1) +
+  
+  # Theoretical Poisson curve
+  geom_line(aes(y = mmean, colour = "Poisson K"),
+            linewidth = 1,
+            linetype = "dashed") +
+  
+  scale_colour_manual(
+    name = "",
+    values = c(
+      "Observed K" = "#92603d",
+      "Poisson K"  = "#9b9c78"
+    )
+  ) +
+  
+  labs(
+    x = "r (m)",
+    y = expression(K[in_hom](r)),
+    title = "Inhomogeneous K-function with Population-based Envelopes"
+  ) +
+  
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 0.6),
+    panel.grid.major = element_line(color = "grey85", linewidth = 0.4),
+    panel.grid.minor = element_blank(),
+    
+    plot.title = element_text(face = "bold", size = 14, hjust = 0.5),
+    axis.title  = element_text(size = 12),
+    axis.text   = element_text(size = 11),
+    
+    legend.position = "top",
+    legend.justification = "center",
+    legend.text = element_text(size = 11),
+    legend.margin = margin(t = -5),
+    
+    plot.margin = margin(10, 10, 10, 10)
+  )
+
+
+# Show it
+print(p_envelope)
+
+#------------------------------------
+# Save to file
+#------------------------------------
+ggsave(
+  filename = file.path(base_dir, "fig_envelope.png"),
+  plot     = p_envelope,
+  width    = output_width_in,
+  height   = output_height_in,
+  dpi      = output_dpi
+)
+```
+
+
+# 2) Method B — Fit an inhomogeneous point-process (ppm) using population as covariate, then test
+ --- Method B: fit ppm(pp ~ pop) and use fitted intensity as lambda ---
+
+This fits a log-linear model for point intensity using population as a covariate, then uses the modelled intensity as `lambda` for Kinhom/envelope. This is more flexible: it estimates the relationship rather than forcing it by simple rescaling.
+
+Notes on Method B:
+- ppm gives you an estimated relationship (coefficient for `pop`) and a fitted intensity that may better capture how population explains your points. You can also try `ppm(pp ~ offset(log(pop)))` if you believe population should be an offset rather than a predictor (i.e. proportional baseline rate).
+- Diagnostics: check `anova(ppm_model)` or `residuals(ppm_model)` if you want more.
+
+```{r}
+# Prepare covariate image for ppm: ensure it's named as a covariate
+pop_cov <- pop_im    # the population image (same as above)
+
+# Fit a log-linear point process model with population as covariate
+# Note: depending on model complexity / sample size you may want to include other covariates or offset(log(pop))
+ppm_model <- ppm(pp ~ pop, covariates = list(pop = pop_cov))
+summary(ppm_model)
+```
+
+```{r}
+# Model-based global envelope:
+set.seed(42)
+EF <- envelope(ppm_model, fun = Kinhom,
+               nsim = 39, r = rvals,
+               correction = "translate",
+               global = TRUE, verbose = FALSE)
+plot(EF, main = "Model-based envelope from ppm(pop)")
+```
+
+
+```{r}
+# Predict the fitted intensity (lambda) as an "im" object
+lambda_fit <- predict(ppm_model)   # returns an image of fitted intensity (units: points per unit area)
+lambda_fit <- eval.im(pmax(lambda_fit, 1e-12))  #？
+
+plot(lambda_fit, main = "Fitted intensity from ppm (pop covariate)")
+
+# Kinhom using the fitted intensity
+K_inhom_fit <- Kinhom(pp, lambda = lambda_fit, r = rvals, correction = "translate")
+plot(K_inhom_fit, main = "Kinhom (using fitted ppm intensity)")
+
+```
+
+
+```{r}
+set.seed(42)
+KT <- envelope(pp, fun = Kinhom,
+               simulate = expression(rpoispp(lambda_fit)),
+               nsim = 39, lambda = lambda_fit, r = rvals,
+               correction = "translate",
+               global = TRUE, verbose = FALSE)
+plot(KT, main = "Global envelope: Kinhom under ppm(pop)")
+
+# One-line formal tests (across r)
+dclf.test(pp, Kinhom,
+          simulate = expression(rpoispp(lambda_fit)),
+          lambda = lambda_fit, nsim = 39)
+
+mad.test(pp,  Kinhom,
+         simulate = expression(rpoispp(lambda_fit)),
+         lambda = lambda_fit, nsim = 39)
+
+```
+
+
+
+```{r}
+# Envelope test simulating inhomogeneous Poisson with the fitted lambda
+set.seed(42)
+env_fit <- envelope(pp, fun = Kinhom,
+                    simulate = expression(rpoispp(lambda_fit)),
+                    nsim = 39,
+                    lambda = lambda_fit,
+                    r = rvals,
+                    correction = "translate",
+                    verbose = FALSE)
+plot(env_fit, main = "Kinhom with ppm-fitted Poisson envelopes")
+```
+
+# Inhomogeneous with L-function (Linhom) and pair correlation function (pcfinhom)
+
+```{r}
+# Inhomogeneous L-function (Linhom)
+L_inhom <- Linhom(pp, lambda = lambda_im, r = rvals, correction = "translate")
+plot(L_inhom, main = "Linhom (population lambda)")
+```
+
+```{r}
+L_fit  <- Linhom(pp, lambda = lambda_fit,  r = rvals, correction = "translate")
+plot(L_fit, main = "L_fit (population lambda)")
+
+```
+
+```{r}
+# Inhomogeneous pair correlation function (pcfinhom)
+g_inhom <- pcfinhom(pp, lambda = lambda_im, r = seq(0,3000,by=50))
+plot(g_inhom, main = "Inhomogeneous pair correlation (population lambda)")
+```
+
+```{r}
+g_fit  <- pcfinhom(pp, lambda = lambda_fit, r = seq(0,3000,by=50))
+plot(g_fit, main = "Inhomogeneous pair correlation g_fit (population lambda)")
+```
+
+
+```{r}
+# Compare L- and g-functions under the two λ’s
+L_im   <- Linhom(pp, lambda = lambda_im,  r = rvals, correction = "translate")
+L_fit  <- Linhom(pp, lambda = lambda_fit, r = rvals, correction = "translate")
+
+g_im   <- pcfinhom(pp, lambda = lambda_im,  r = seq(0,3000,by=50))
+g_fit  <- pcfinhom(pp, lambda = lambda_fit, r = seq(0,3000,by=50))
+
+par(mfrow=c(1,2))
+plot(L_im,  main="Linhom (scaled WorldPop λ)",  legend=FALSE)
+plot(L_fit, main="Linhom (ppm-fitted λ)",      legend=FALSE)
+
+par(mfrow=c(1,2))
+plot(g_im,  main="pcfinhom (scaled WorldPop λ)", legend=FALSE)
+plot(g_fit, main="pcfinhom (ppm-fitted λ)",      legend=FALSE)
+par(mfrow=c(1,1))
+
+```
+
+
+
+```{r}
+# Numeric checks
+n_bad <- sum(is.na(lambda_im[pp]))
+cat("Points falling on NA λ (scaled WorldPop):", n_bad, "\n")
+cat("Min/Median/Max λ at points (scaled):",
+    min(lambda_im[pp], na.rm=TRUE), median(lambda_im[pp], na.rm=TRUE),
+    max(lambda_im[pp], na.rm=TRUE), "\n")
+
+n_bad_fit <- sum(is.na(lambda_fit[pp]))
+cat("Points on NA λ (fitted):", n_bad_fit, "\n")
+
+# Histogram of λ values at data points vs. everywhere
+lam_pts  <- lambda_im[pp]
+lam_field <- as.vector(lambda_im$v)
+hist(lam_pts,  breaks=30, main="λ at waste points (scaled WorldPop)", xlab="λ")
+hist(lam_field, breaks=30, main="λ across window (scaled WorldPop)",  xlab="λ")
+
+```
+
+
+
+```{r}
+# Does population improve fit?
+m0 <- ppm(pp ~ 1)                    # intercept-only (homogeneous)
+m1 <- ppm(pp ~ pop, covariates = list(pop = pop_im))
+anova(m0, m1, test="LRT")            # should be highly significant
+
+# Trend vs population (nonparametric) — checks functional form
+R <- rhohat(pp, covariate = pop_im)  # intensity vs population
+plot(R, main="rhohat: intensity vs population")
+
+# Residual diagnostics
+# diagnose(m1, type="qq")              # QQ plot for pixel residuals
+# lurking(m1, pop_im)                  # residuals vs population covariate
+# spatstat.model::diagnose.ppm(m1, type = "qq")
+
+spatstat.model::diagnose.ppm(m1, type = "raw")            # residual map
+spatstat.model::lurking(m1, covariate = pop_im)           # residuals vs pop
+```
+
+
+```{r}
+# Points must lie in window and on non-NA lambda
+stopifnot(all(inside.owin(pp$x, pp$y, w)))
+any_bad <- any(is.na(lambda_im[pp]))
+if (any_bad) stop("Some points fall where lambda_im is NA. Fix with flooring/masking.")
+
+# Visual: overlay points on λ
+plot(lambda_im, main = "lambda_im + points")
+# points(pp, pch = 20, cex = 0.5)
+```
+
+
+
+
+## Optional alternative: proportional (offset) model
+```{r}
+eps <- 1e-6
+ppm_off <- ppm(pp ~ offset(log(pop + eps)), covariates = list(pop = pop_im))
+envelope(ppm_off, Kinhom, nsim=39, r=rvals, correction="translate")
+```
+
+
+
+```{r}
+eps <- 1e-6
+ppm_off <- ppm(pp ~ offset(log(pop + eps)),
+               covariates = list(pop = pop_im))
+
+set.seed(1)
+EF_off <- envelope(ppm_off, fun = Kinhom,
+                   nsim = 39, r = rvals,
+                   correction = "translate",
+                   global = TRUE, verbose = FALSE)
+plot(EF_off, main = "Model-based envelope: offset log(pop)")
+
+```
+
+
+# Diagnostics section (put after your existing anova, rhohat, and residuals)
+```{r}
+# (If not already run above)
+dclf.test(pp, Kinhom,
+          simulate = expression(rpoispp(lambda_fit)),
+          lambda = lambda_fit, nsim = 39)
+mad.test(pp,  Kinhom,
+         simulate = expression(rpoispp(lambda_fit)),
+         lambda = lambda_fit, nsim = 39)
+
+```
+
+
+# Optional “Model validation (super-thinning)” section (end of document)
+
+```{r}
+library(spatstat.random)
+
+# Pick a target constant rate (common choice: median of fitted λ)
+lam0 <- median(as.vector(lambda_fit$v), na.rm = TRUE)
+
+# Make sure λ̂ has no zeros/NA inside the window
+lambda_fit <- eval.im(pmax(lambda_fit, 1e-12))
+lambda_fit <- eval.im(ifelse(is.na(lambda_fit), 1e-12, lambda_fit))
+
+# Thinning probability as an IMAGE: P(x) = min(1, lam0 / λ̂(x))
+Pimage <- eval.im(pmin(1, lam0 / lambda_fit))
+
+# Thin using the image (no length-mismatch possible)
+pp_thin <- rthin(pp, P = Pimage)
+ 
+# Fill deficits so the result is ~ CSR at rate lam0
+resid_im <- eval.im(pmax(0, lam0 - lambda_fit))
+resid_im <- eval.im(ifelse(is.na(resid_im), 0, resid_im))
+pois_sup <- rpoispp(resid_im)
+
+pp_super <- superimpose(pp_thin, pois_sup)
+
+# Test against CSR (use explicit CSR sims at rate lam0 on the same window)
+set.seed(1)
+env_super <- envelope(
+  pp_super, fun = Kest, r = rvals, nsim = 199,
+  simulate = expression(rpoispp(lam0, win = Window(pp_super))),
+  correction = "translate", global = TRUE, verbose = FALSE
+)
+plot(env_super, main = "Super-thinned pattern vs CSR (Kest)")
+
+```
+
+
+
+
+
+Table X. Summary of point process analyses using population as the only covariate.
+
+| Analysis step                         | Intensity specification                        | Test / diagnostic                            | Evidence of residual clustering?                 | Interpretation                                                                 |
+|--------------------------------------|-----------------------------------------------|----------------------------------------------|-----------------------------------------------|-------------------------------------------------------------------------------|
+| 1. Kinhom with scaled WorldPop       | λ(u) ∝ WorldPop, rescaled to match n points   | K_inhom vs theoretical Poisson K             | Yes – empirical K lies above theoretical K    | Population explains some broad trend, but points are more clustered than an inhomogeneous Poisson with this intensity. |
+| 2. Envelopes under scaled WorldPop   | Same λ(u) as step 1, treated as fixed         | Monte Carlo envelopes from IPP(λ_pop)        | Yes – empirical K exceeds simulation envelope | Inhomogeneous Poisson with intensity proportional to population is rejected; additional structure remains.             |
+| 3. Model-based envelopes for ppm(pop)| Log-linear IPP with population as covariate   | Model-based global envelopes (simulate + refit)| No – empirical K stays within global envelope | Population-only log-linear model provides an acceptable first-order description when parameter uncertainty is included. |
+| 4. Kinhom with fitted ppm intensity  | Fitted λ̂(u) from ppm(pop), treated as fixed  | K_inhom vs theoretical Poisson K             | Yes – empirical K above theoretical K         | Even with the fitted intensity, points remain more clustered than a Poisson process with that λ̂(u).                   |
+| 5. Envelopes under fitted λ̂(u)      | Same λ̂(u) as step 4, treated as fixed        | Monte Carlo (global/pointwise) envelopes     | Yes – empirical K leaves the envelopes        | Inhomogeneous Poisson mechanism is insufficient; there is residual clustering beyond what population alone explains.   |
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
